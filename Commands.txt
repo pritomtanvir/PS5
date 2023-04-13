@@ -23,7 +23,7 @@ Example...
 instead of add-migration initial
 it is:
 dotnet ef migrations add initial
-
+dotnet ef database update --context ApplicationDbContext 
 For Mac:
 Install .net 6.0 CLI, start the CLI
 Install EF:

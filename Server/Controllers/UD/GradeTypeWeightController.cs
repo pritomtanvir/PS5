@@ -27,86 +27,90 @@ using System.Numerics;
 using DOOR.Shared.DTO;
 using DOOR.Shared.Utils;
 using DOOR.Server.Controllers.Common;
+using Telerik.SvgIcons;
+using static System.Collections.Specialized.BitVector32;
 
-namespace CSBA6.Server.Controllers.app
+namespace DOOR.Server.Controllers.UD
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CourseController : BaseController
+    public class GradeTypeWeightController : BaseController
     {
-        public CourseController(DOOROracleContext _DBcontext,
-            OraTransMsgs _OraTransMsgs)
-            : base(_DBcontext, _OraTransMsgs)
-
+        public GradeTypeWeightController(DOOROracleContext DBcontext,
+            OraTransMsgs _OraTransMsgs) :
+            base(DBcontext, _OraTransMsgs)
         {
         }
 
-
         [HttpGet]
-        [Route("GetCourse")]
-        public async Task<IActionResult> GetCourse()
+        [Route("GetGradeTypeWeight")]
+        public async Task<IActionResult> GetGradeTypeWeight()
         {
-            List<CourseDTO> lst = await _context.Courses
-                .Select(sp => new CourseDTO
+            List<GradeTypeWeightDTO> lst = await _context.GradeTypeWeights
+                .Select(sp => new GradeTypeWeightDTO
                 {
-                    Cost = sp.Cost,
-                    CourseNo = sp.CourseNo,
+                    SchoolId = sp.SchoolId,
+                    SectionId = sp.SectionId,
+                    GradeTypeCode = sp.GradeTypeCode,
+                    NumberPerSection = sp.NumberPerSection,
+                    PercentOfFinalGrade = sp.PercentOfFinalGrade,
+                    DropLowest = sp.DropLowest,
                     CreatedBy = sp.CreatedBy,
                     CreatedDate = sp.CreatedDate,
-                    Description = sp.Description,
                     ModifiedBy = sp.ModifiedBy,
                     ModifiedDate = sp.ModifiedDate,
-                    Prerequisite = sp.Prerequisite,
-                    PrerequisiteSchoolId = sp.PrerequisiteSchoolId,
-                    SchoolId = sp.SchoolId
                 }).ToListAsync();
             return Ok(lst);
         }
 
-
         [HttpGet]
-        [Route("GetCourse/{_CourseNo}/{_SchoolId}")]
-        public async Task<IActionResult> GetCourse(int _CourseNo, int _SchoolId)
+        [Route("GetGradeTypeWeight/{_SchoolId}/{_SectionId}/{_GradeTypeCode}")]
+        public async Task<IActionResult> GetGradeTypeWeight(int _SchoolId, int _SectionId, string _GradeTypeCode)
         {
-            CourseDTO? lst = await _context.Courses
-                .Where(x => x.CourseNo == _CourseNo)
+            GradeTypeWeightDTO? lst = await _context.GradeTypeWeights
                 .Where(x => x.SchoolId == _SchoolId)
-                .Select(sp => new CourseDTO
+                .Where(x => x.SectionId == _SectionId)
+                .Where(x => x.GradeTypeCode == _GradeTypeCode)
+                .Select(sp => new GradeTypeWeightDTO
                 {
-                    Cost = sp.Cost,
-                    CourseNo = sp.CourseNo,
+                    SchoolId = sp.SchoolId,
+                    SectionId = sp.SectionId,
+                    GradeTypeCode = sp.GradeTypeCode,
+                    NumberPerSection = sp.NumberPerSection,
+                    PercentOfFinalGrade = sp.PercentOfFinalGrade,
+                    DropLowest = sp.DropLowest,
                     CreatedBy = sp.CreatedBy,
                     CreatedDate = sp.CreatedDate,
-                    Description = sp.Description,
                     ModifiedBy = sp.ModifiedBy,
                     ModifiedDate = sp.ModifiedDate,
-                    Prerequisite = sp.Prerequisite,
-                    SchoolId = sp.SchoolId,
-                    PrerequisiteSchoolId = sp.PrerequisiteSchoolId
                 }).FirstOrDefaultAsync();
             return Ok(lst);
+
         }
 
-
         [HttpPost]
-        [Route("PostCourse")]
-        public async Task<IActionResult> PostCourse([FromBody] CourseDTO _CourseDTO)
+        [Route("PostGradeTypeWeight")]
+        public async Task<IActionResult> PostGradeTypeWeight([FromBody] GradeTypeWeightDTO _GradeTypeWeightDTO)
         {
             try
             {
-                Course? c = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo)
-                                                 .Where(x => x.SchoolId == _CourseDTO.SchoolId)
-                                                 .FirstOrDefaultAsync();
+                GradeTypeWeight? t = await _context.GradeTypeWeights
+                    .Where(x => x.SchoolId == _GradeTypeWeightDTO.SchoolId)
+                    .Where(x => x.SectionId == _GradeTypeWeightDTO.SectionId)
+                    .Where(x => x.GradeTypeCode == _GradeTypeWeightDTO.GradeTypeCode).FirstOrDefaultAsync();
 
-                if (c == null)
+                if (t == null)
                 {
-                    c = new Course
+                    t = new GradeTypeWeight
                     {
-                        Cost = _CourseDTO.Cost,
-                        Description = _CourseDTO.Description,
-                        Prerequisite = _CourseDTO.Prerequisite
+                        SchoolId = _GradeTypeWeightDTO.SchoolId,
+                        SectionId = _GradeTypeWeightDTO.SectionId,
+                        GradeTypeCode = _GradeTypeWeightDTO.GradeTypeCode,
+                        NumberPerSection = _GradeTypeWeightDTO.NumberPerSection,
+                        PercentOfFinalGrade = _GradeTypeWeightDTO.PercentOfFinalGrade,
+                        DropLowest = _GradeTypeWeightDTO.DropLowest
                     };
-                    _context.Courses.Add(c);
+                    _context.GradeTypeWeights.Add(t);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -127,31 +131,29 @@ namespace CSBA6.Server.Controllers.app
 
             return Ok();
         }
-
-
-
-
-
-
 
 
         [HttpPut]
-        [Route("PutCourse")]
-        public async Task<IActionResult> PutCourse([FromBody] CourseDTO _CourseDTO)
+        [Route("PutGradeTypeWeight")]
+        public async Task<IActionResult> PutGradeTypeWeight([FromBody] GradeTypeWeightDTO _GradeTypeWeightDTO)
         {
             try
             {
-                Course? c = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo)
-                    .Where(x => x.SchoolId == _CourseDTO.SchoolId)
-                    .FirstOrDefaultAsync();
+                GradeTypeWeight? t = await _context.GradeTypeWeights
+                    .Where(x => x.SchoolId == _GradeTypeWeightDTO.SchoolId)
+                    .Where(x => x.SectionId == _GradeTypeWeightDTO.SectionId)
+                    .Where(x => x.GradeTypeCode == _GradeTypeWeightDTO.GradeTypeCode).FirstOrDefaultAsync();
 
-                if (c != null)
+                if (t != null)
                 {
-                    c.Description = _CourseDTO.Description;
-                    c.Cost = _CourseDTO.Cost;
-                    c.Prerequisite = _CourseDTO.Prerequisite;
+                    t.SchoolId = _GradeTypeWeightDTO.SchoolId;
+                    t.SectionId = _GradeTypeWeightDTO.SectionId;
+                    t.GradeTypeCode = _GradeTypeWeightDTO.GradeTypeCode;
+                    t.NumberPerSection = _GradeTypeWeightDTO.NumberPerSection;
+                    t.PercentOfFinalGrade = _GradeTypeWeightDTO.PercentOfFinalGrade;
+                    t.DropLowest = _GradeTypeWeightDTO.DropLowest;
 
-                    _context.Courses.Update(c);
+                    _context.GradeTypeWeights.Update(t);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -172,21 +174,21 @@ namespace CSBA6.Server.Controllers.app
 
             return Ok();
         }
-
 
         [HttpDelete]
-        [Route("DeleteCourse/{_CourseNo}/{_SchoolId}")]
-        public async Task<IActionResult> DeleteCourse(int _CourseNo, int _SchoolId)
+        [Route("DeleteGradeTypeWeight/{_SchoolId}/{_SectionId}/{_GradeTypeCode}")]
+        public async Task<IActionResult> DeleteGradeTypeWeight(int _SchoolId, int _SectionId, string _GradeTypeCode)
         {
             try
             {
-                Course? c = await _context.Courses.Where(x => x.CourseNo == _CourseNo)
+                GradeTypeWeight? t = await _context.GradeTypeWeights
                     .Where(x => x.SchoolId == _SchoolId)
-                    .FirstOrDefaultAsync();
+                    .Where(x => x.SectionId == _SectionId)
+                    .Where(x => x.GradeTypeCode == _GradeTypeCode).FirstOrDefaultAsync();
 
-                if (c != null)
+                if (t != null)
                 {
-                    _context.Courses.Remove(c);
+                    _context.GradeTypeWeights.Remove(t);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -207,8 +209,6 @@ namespace CSBA6.Server.Controllers.app
 
             return Ok();
         }
-
-
 
     }
 }

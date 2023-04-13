@@ -28,13 +28,15 @@ using DOOR.Shared.DTO;
 using DOOR.Shared.Utils;
 using DOOR.Server.Controllers.Common;
 
-namespace CSBA6.Server.Controllers.app
+
+namespace DOOR.Server.Controllers.UD
+
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CourseController : BaseController
+    public class ZipController : BaseController
     {
-        public CourseController(DOOROracleContext _DBcontext,
+        public ZipController(DOOROracleContext _DBcontext,
             OraTransMsgs _OraTransMsgs)
             : base(_DBcontext, _OraTransMsgs)
 
@@ -43,70 +45,67 @@ namespace CSBA6.Server.Controllers.app
 
 
         [HttpGet]
-        [Route("GetCourse")]
-        public async Task<IActionResult> GetCourse()
+        [Route("GetZipcode")]
+        public async Task<IActionResult> GetZipcode()
         {
-            List<CourseDTO> lst = await _context.Courses
-                .Select(sp => new CourseDTO
+            List<ZipcodeDTO> lst = await _context.Zipcodes
+                .Select(sp => new ZipcodeDTO
                 {
-                    Cost = sp.Cost,
-                    CourseNo = sp.CourseNo,
+                    City = sp.City,
                     CreatedBy = sp.CreatedBy,
                     CreatedDate = sp.CreatedDate,
-                    Description = sp.Description,
                     ModifiedBy = sp.ModifiedBy,
                     ModifiedDate = sp.ModifiedDate,
-                    Prerequisite = sp.Prerequisite,
-                    PrerequisiteSchoolId = sp.PrerequisiteSchoolId,
-                    SchoolId = sp.SchoolId
+                    State = sp.State,
+                    Zip = sp.Zip
                 }).ToListAsync();
             return Ok(lst);
         }
 
 
         [HttpGet]
-        [Route("GetCourse/{_CourseNo}/{_SchoolId}")]
-        public async Task<IActionResult> GetCourse(int _CourseNo, int _SchoolId)
+        [Route("GetZipcode/{_Zip}")]
+        public async Task<IActionResult> GetZipcode(string _Zip)
         {
-            CourseDTO? lst = await _context.Courses
-                .Where(x => x.CourseNo == _CourseNo)
-                .Where(x => x.SchoolId == _SchoolId)
-                .Select(sp => new CourseDTO
+            ZipcodeDTO? lst = await _context.Zipcodes
+                .Where(x => x.Zip == _Zip)
+                .Select(sp => new ZipcodeDTO
                 {
-                    Cost = sp.Cost,
-                    CourseNo = sp.CourseNo,
+                    City = sp.City,
                     CreatedBy = sp.CreatedBy,
                     CreatedDate = sp.CreatedDate,
-                    Description = sp.Description,
                     ModifiedBy = sp.ModifiedBy,
                     ModifiedDate = sp.ModifiedDate,
-                    Prerequisite = sp.Prerequisite,
-                    SchoolId = sp.SchoolId,
-                    PrerequisiteSchoolId = sp.PrerequisiteSchoolId
+                    State = sp.State,
+                    Zip = sp.Zip
+
                 }).FirstOrDefaultAsync();
             return Ok(lst);
         }
 
 
         [HttpPost]
-        [Route("PostCourse")]
-        public async Task<IActionResult> PostCourse([FromBody] CourseDTO _CourseDTO)
+        [Route("PostZipcode")]
+        public async Task<IActionResult> PostZipcode([FromBody] ZipcodeDTO _ZipcodeDTO)
         {
             try
             {
-                Course? c = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo)
-                                                 .Where(x => x.SchoolId == _CourseDTO.SchoolId)
-                                                 .FirstOrDefaultAsync();
+                Zipcode? z = await _context.Zipcodes.Where(x => x.Zip == _ZipcodeDTO.Zip).FirstOrDefaultAsync();
 
-                if (c == null)
+                if (z != null)
                 {
-                    c = new Course
+                    z = new Zipcode
                     {
-                        Cost = _CourseDTO.Cost,
-                        Description = _CourseDTO.Description,
-                        Prerequisite = _CourseDTO.Prerequisite
+                        City = _ZipcodeDTO.City,
+                        CreatedBy = _ZipcodeDTO.CreatedBy,
+                        CreatedDate = _ZipcodeDTO.CreatedDate,
+                        ModifiedBy = _ZipcodeDTO.ModifiedBy,
+                        ModifiedDate = _ZipcodeDTO.ModifiedDate,
+                        State = _ZipcodeDTO.State,
+                        Zip = _ZipcodeDTO.Zip
+
                     };
-                    _context.Courses.Add(c);
+                    _context.Zipcodes.Add(z);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -128,30 +127,25 @@ namespace CSBA6.Server.Controllers.app
             return Ok();
         }
 
-
-
-
-
-
-
-
         [HttpPut]
-        [Route("PutCourse")]
-        public async Task<IActionResult> PutCourse([FromBody] CourseDTO _CourseDTO)
+        [Route("PutZipcode")]
+        public async Task<IActionResult> PutZipcode([FromBody] ZipcodeDTO _ZipcodeDTO)
         {
             try
             {
-                Course? c = await _context.Courses.Where(x => x.CourseNo == _CourseDTO.CourseNo)
-                    .Where(x => x.SchoolId == _CourseDTO.SchoolId)
-                    .FirstOrDefaultAsync();
+                Zipcode? z = await _context.Zipcodes.Where(x => x.Zip == _ZipcodeDTO.Zip).FirstOrDefaultAsync();
 
-                if (c != null)
+                if (z != null)
                 {
-                    c.Description = _CourseDTO.Description;
-                    c.Cost = _CourseDTO.Cost;
-                    c.Prerequisite = _CourseDTO.Prerequisite;
+                    z.City = _ZipcodeDTO.City;
+                    z.CreatedBy = _ZipcodeDTO.CreatedBy;
+                    z.CreatedDate = _ZipcodeDTO.CreatedDate;
+                    z.ModifiedBy = _ZipcodeDTO.ModifiedBy;
+                    z.ModifiedDate = _ZipcodeDTO.ModifiedDate;
+                    z.State = _ZipcodeDTO.State;
+                    z.Zip = _ZipcodeDTO.Zip;
 
-                    _context.Courses.Update(c);
+                    _context.Zipcodes.Update(z);
                     await _context.SaveChangesAsync();
                 }
             }
@@ -175,18 +169,16 @@ namespace CSBA6.Server.Controllers.app
 
 
         [HttpDelete]
-        [Route("DeleteCourse/{_CourseNo}/{_SchoolId}")]
-        public async Task<IActionResult> DeleteCourse(int _CourseNo, int _SchoolId)
+        [Route("DeleteZipcode/{_Zip}")]
+        public async Task<IActionResult> DeleteZipcode(string _Zip)
         {
             try
             {
-                Course? c = await _context.Courses.Where(x => x.CourseNo == _CourseNo)
-                    .Where(x => x.SchoolId == _SchoolId)
-                    .FirstOrDefaultAsync();
+                Zipcode? z = await _context.Zipcodes.Where(x => x.Zip == _Zip).FirstOrDefaultAsync();
 
-                if (c != null)
+                if (z != null)
                 {
-                    _context.Courses.Remove(c);
+                    _context.Zipcodes.Remove(z);
                     await _context.SaveChangesAsync();
                 }
             }
